@@ -33,18 +33,40 @@ class AssetReportController extends Controller
 
     public function roomReport(Request $request)
     {
-        $rooms = AssetItem::with('department', 'location','room')->get();
+        $locations = \Modules\Asset\Models\Location::all();
+        $rooms = collect(); // Kosongkan dulu sebelum gedung dipilih
+
+        $selectedLocationId = $request->get('location_id');
         $selectedRoomId = $request->get('room_id');
 
         $assets = collect();
         $selectedRoom = null;
 
-        if ($selectedRoomId) {
-            $selectedRoom = AssetItem::with('department', 'location')->find($selectedRoomId);
-            $assets = AssetItem::where('room_id', $selectedRoomId)->get();
+        // Jika gedung dipilih, ambil ruangan yang ada di gedung tersebut atau semua ruangan
+        if ($selectedLocationId) {
+            // Jika tabel rooms Anda punya kolom location_id, gunakan:
+            $rooms = \Modules\Asset\Models\Room::where('location_id', $selectedLocationId)->get();
+            // Atau jika rooms mengambil relasi dari assets, bisa disesuaikan.
+        } else {
+            $rooms = \Modules\Asset\Models\Room::all();
         }
 
-        return view('asset::reports.room', compact('rooms', 'assets', 'selectedRoom', 'selectedRoomId'));
+        // Jika ruangan dipilih, ambil data aset berdasarkan location_id dan room_id
+        if ($selectedRoomId) {
+            $selectedRoom = \Modules\Asset\Models\Room::with('department')->find($selectedRoomId);
+            
+            $query = AssetItem::with(['location', 'room']);
+            
+            if ($selectedLocationId) {
+                $query->where('location_id', $selectedLocationId);
+            }
+            
+            $query->where('room_id', $selectedRoomId);
+            
+            $assets = $query->get();
+        }
+
+        return view('asset::reports.room', compact('locations', 'rooms', 'assets', 'selectedRoom', 'selectedLocationId', 'selectedRoomId'));
     }
 
     // 2. Laporan Keuangan & Penyusutan (Depreciation)
