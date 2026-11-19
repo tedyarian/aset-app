@@ -46,7 +46,7 @@
             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Foto Fisik Barang</h4>
             <div>
                 @if($asset->image)
-                    <img src="{{ asset($asset->image) }}" alt="Foto Aset" class="w-full h-32 object-cover rounded-lg border border-slate-200">
+                    <img src="{{ asset('storage/' . $asset->image) }}" alt="Foto Aset" class="w-full h-32 object-cover rounded-lg border border-slate-200">
                 @else
                     <div class="w-full h-32 bg-slate-50 border border-dashed border-slate-300 rounded-lg flex items-center justify-center text-xs text-slate-400 text-center p-2">
                         Tidak ada foto fisik diunggah.
